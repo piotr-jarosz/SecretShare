@@ -1,0 +1,2 @@
+FLASK_APP=SC_flask.py
+SECRET_KEY=
