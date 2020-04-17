@@ -6,6 +6,7 @@ from app import app
 from models import Secret
 from json import dumps
 
+@app.route("/secret", methods=['GET', 'POST'])
 @app.route("/secret/", methods=['GET', 'POST'])
 def index():
     form = SecretForm()
@@ -24,12 +25,14 @@ def index_redirect():
 
 
 @app.route("/secret/<secret_id>")
+@app.route("/secret/<secret_id>/")
 def read_secret(secret_id):
     secret = Secret.read(secret_id)
     return render_template('secret.html', secret=secret, secret_id=secret_id)
 
 
 @app.route("/secret/<secret_id>/show")
+@app.route("/secret/<secret_id>/show/")
 def show_secret(secret_id):
     secret = Secret.read(secret_id=secret_id)
     if secret:
@@ -41,6 +44,7 @@ def show_secret(secret_id):
 
 
 @app.route("/secret/<secret_id>/admin")
-def secret_admin(secret_id, methods=['GET', 'POST']):
+@app.route("/secret/<secret_id>/admin/")
+def secret_admin(secret_id):
     secret = Secret.read(secret_id=secret_id)
     return render_template('secret_admin.html', secret=secret, secret_id=secret_id)
