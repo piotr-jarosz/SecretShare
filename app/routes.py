@@ -6,13 +6,13 @@ from app import app
 from models import Secret
 from json import dumps
 
+
 @app.route("/secret", methods=['GET', 'POST'])
 @app.route("/secret/", methods=['GET', 'POST'])
 def index():
     form = SecretForm()
     if form.validate_on_submit():
-        flash('Secret: {}, Passphrase: {}, ttl={}'.format(
-            form.secret.data, form.passphrase.data, form.ttl.data))
+        flash('Secret created!')
         secret = Secret(form.secret.data, form.ttl.data, form.passphrase.data)
         secret_id = secret.save()
         return redirect('/secret/' + secret_id + '/admin')

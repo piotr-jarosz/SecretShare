@@ -36,16 +36,18 @@
         {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for message in messages %}
-<div class="alert alert-info" role="alert">{{ message }}</div>            {% endfor %}
+<div class="alert alert-info" role="alert">{{ message }}</div>
+            {% endfor %}
         {% endif %}
         {% endwith %}
         {% block scontent %}
         {% endblock %}
-         </div>
-     <div class="navbar navbar-text navbar-fixed-bottom">
-    <p>© 2020 Copyright:
+
+     <div class="navbar navbar-text navbar-inverse navbar-fixed-bottom center-block">
+    <p class="navbar-text" align="center">© 2020 Copyright:
         <a href="https://www.icoqu.com/">icoqu.com</a> under MIT license. Source code is avaliable at:<a href="https://github.com/Icoqu/SecretShare">https://github.com/Icoqu/SecretShare</a></p>
 </div>
+     </div>
  {% endblock %}
 </body>
 </html>
