@@ -16,15 +16,16 @@ class Secret:
     SALT = 'app.secret_keyas'
     bSALT = bytes(SALT, 'UTF-8')
 
-    def __init__(self, secret_value: str, ttl, passphrase: str = '', created_at: str = str(dt.datetime.utcnow()),
+    def __init__(self, secret_value: str, ttl, passphrase = '', created_at: str = str(dt.datetime.utcnow()),
                  encrypted = False, secret_id: str = ''):
         self.ittl = int(ttl)
-        kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=self.bSALT, iterations=100000,
-                         backend=default_backend())
-        bpassphrase = bytes(passphrase, 'UTF-8')
-        key = base64.urlsafe_b64encode(kdf.derive(bpassphrase))
-        f = Fernet(key)
+        self.passphrase = True if passphrase else False
         if not encrypted:
+            kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=self.bSALT, iterations=100000,
+                             backend=default_backend())
+            bpassphrase = bytes(passphrase, 'UTF-8')
+            key = base64.urlsafe_b64encode(kdf.derive(bpassphrase))
+            f = Fernet(key)
             encrypted = f.encrypt(bytes(secret_value, 'UTF-8'))
             self.secret = encrypted
         else:
@@ -40,6 +41,7 @@ class Secret:
             'secret': str(self.secret),
             'created_at': str(self.created_at),
             'end_of_life': str(self.end_of_life),
+            'passphrase': self.passphrase,
             'ttl': self.ittl
         })}
         r.mset(secret)
@@ -75,5 +77,6 @@ class Secret:
             'secret': str(self.secret),
             'created_at': str(self.created_at),
             'end_of_life': str(self.end_of_life),
-            'ttl': self.ittl
+            'ttl': self.ittl,
+            'passphrase': self.passphrase
         }})
