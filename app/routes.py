@@ -1,3 +1,4 @@
+import json
 from typing import Optional, Dict, Union, Any
 
 from flask import render_template, flash, redirect, url_for
@@ -26,25 +27,27 @@ def index_redirect():
 
 @app.route("/secret/<secret_id>")
 @app.route("/secret/<secret_id>/")
-def read_secret(secret_id):
-    secret = Secret.read(secret_id)
+def read_secret(secret_id: str):
+    if Secret.load(secret_id):
+        secret = True
+    else:
+        secret = False
     return render_template('secret.html', secret=secret, secret_id=secret_id)
 
 
 @app.route("/secret/<secret_id>/show")
 @app.route("/secret/<secret_id>/show/")
 def show_secret(secret_id):
-    secret = Secret.read(secret_id=secret_id)
+    secret = Secret.load(secret_id)
     if secret:
-        secret = dumps(secret)
-        Secret.destroy(secret_id)
+        secret_value = secret.read()
     else:
-        secret = None
-    return secret
+        secret_value = 'None'
+    return json.dumps({ 'secret' : secret_value })
 
 
 @app.route("/secret/<secret_id>/admin")
 @app.route("/secret/<secret_id>/admin/")
 def secret_admin(secret_id):
-    secret = Secret.read(secret_id=secret_id)
+    secret = Secret.load(secret_id)
     return render_template('secret_admin.html', secret=secret, secret_id=secret_id)

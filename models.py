@@ -1,8 +1,11 @@
 import datetime as dt
 from hashlib import md5
-from Crypto.Cipher import AES
-from Crypto import Random
-# from app import app
+from cryptography.fernet import Fernet
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import random
+import base64
 import json
 import redis
 
@@ -13,50 +16,64 @@ class Secret:
     SALT = 'app.secret_keyas'
     bSALT = bytes(SALT, 'UTF-8')
 
-    def __init__(self, secret_value: str, ttl, passphrase: str = ''):
+    def __init__(self, secret_value: str, ttl, passphrase: str = '', created_at: str = str(dt.datetime.utcnow()),
+                 encrypted = False, secret_id: str = ''):
         self.ittl = int(ttl)
-        ### COMMENTED OUT DUE TO KRYPTOGRAPHY WORK NEEDED
-        ### AES IS NOT BEST OPTION.
-        # key = self.bSALT + bytes(passphrase, 'UTF-8') if passphrase else self.bSALT
-        # iv = Random.new().read(AES.block_size)
-        # cipher = AES.new(key, AES.MODE_CFB, iv)
-        # secret = iv + cipher.encrypt(bytes(secret_value, 'UTF-8'))
-        self.secret = secret_value  # secret.hex()
-        self.created_at = dt.datetime.utcnow()
+        kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=self.bSALT, iterations=100000,
+                         backend=default_backend())
+        bpassphrase = bytes(passphrase, 'UTF-8')
+        key = base64.urlsafe_b64encode(kdf.derive(bpassphrase))
+        f = Fernet(key)
+        if not encrypted:
+            encrypted = f.encrypt(bytes(secret_value, 'UTF-8'))
+            self.secret = encrypted
+        else:
+            self.secret = secret_value
+        self.created_at = dt.datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S.%f')
         self.end_of_life = self.created_at + dt.timedelta(hours=self.ittl)
-        sid = secret_value + str(self.created_at) + self.SALT
+        sid = str(self.created_at) + ''.join([str(random.randint(0,10)) for _ in range(10)])
         sid = sid.encode()
-        self.secret_id = md5(sid).hexdigest()
+        self.secret_id = secret_id if secret_id else md5(sid).hexdigest()
 
     def save(self):
         secret = {self.secret_id: json.dumps({
-            'secret': self.secret,
+            'secret': str(self.secret),
             'created_at': str(self.created_at),
             'end_of_life': str(self.end_of_life),
             'ttl': self.ittl
         })}
-        secret_json = json.dumps(secret)
         r.mset(secret)
         return self.secret_id
 
-    def destroy(secret_id: str):
-        r.delete(secret_id)
+    def destroy(self):
+        r.delete(self.secret_id)
 
-    def read(secret_id: str, passphrase: str = ''):
-        # key = self.bSALT + bytes(passphrase, 'UTF-8') if passphrase else self.bSALT
-        # iv = Random.new().read(AES.block_size)
-        # cipher = AES.new(key, AES.MODE_CFB, iv)
-        # secret_value = cipher.decrypt(bytes.fromhex(secret))[len(iv):]
+    def load(secret_id: str):
         secret = r.get(secret_id)
         if secret:
             secret = json.loads(secret)
+            return Secret(secret['secret'], ttl=secret['ttl'], created_at=secret['created_at'], encrypted=True,
+                      secret_id=secret_id)
         else:
-            return None
-        if dt.datetime.utcnow() < dt.datetime.strptime(secret['end_of_life'], '%Y-%m-%d %H:%M:%S.%f'):
-            return secret
+            return False
+
+    def read(self, passphrase: str = ''):
+        Secret.destroy(self)
+        if dt.datetime.utcnow() < self.created_at + dt.timedelta(hours=self.ittl):
+            kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=self.bSALT, iterations=100000,
+                             backend=default_backend())
+            bpassphrase = bytes(passphrase, 'UTF-8')
+            key = base64.urlsafe_b64encode(kdf.derive(bpassphrase))
+            f = Fernet(key)
+            decrypted = f.decrypt(eval(self.secret))
+            return decrypted.decode()
         else:
-            Secret.destroy(secret_id)
             return False
 
     def __repr__(self):
-        return '<Secret_id:{}>'.format(self.secret_id)
+        return json.dumps({self.secret_id: {
+            'secret': str(self.secret),
+            'created_at': str(self.created_at),
+            'end_of_life': str(self.end_of_life),
+            'ttl': self.ittl
+        }})
