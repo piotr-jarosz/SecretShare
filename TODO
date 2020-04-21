@@ -1,6 +1,4 @@
 important:
-TODO: make redis configurable
-TODO: errors handling
 TODO: refactor flask application
 
 communication:

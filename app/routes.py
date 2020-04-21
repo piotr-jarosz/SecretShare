@@ -1,9 +1,11 @@
 import json
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash as flask_flash, redirect, url_for, request
 from app.forms import SecretForm, ReadSecretForm
 from app import app
 from models import Secret
+from functools import partial
 
+flash = partial(flask_flash, category='info')
 
 @app.route("/secret", methods=['GET', 'POST'])
 @app.route("/secret/", methods=['GET', 'POST'])
@@ -34,7 +36,10 @@ def read_secret(secret_id: str):
         form = ReadSecretForm()
         if form.validate_on_submit():
             secret = s.read(passphrase=form.passphrase.data)
-            return json.dumps({'secret': secret})
+            if secret:
+                return json.dumps({'secret': secret})
+            else:
+                return json.dumps({'secret': secret}), 404
     else:
         form = False
         passphrase = False
