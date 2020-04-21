@@ -12,22 +12,24 @@
     <nav class="navbar navbar-inverse">
         <div class="container">
             <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="{{ url_for('index') }}">SecretShare</a>
+{#                TODO: Uncomment when static pages added#}
+{#                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">#}
+{#                    <span class="sr-only">Toggle navigation</span>#}
+{#                    <span class="icon-bar"></span>#}
+{#                    <span class="icon-bar"></span>#}
+{#                    <span class="icon-bar"></span>#}
+{#                </button>#}
+                <div  class="navbar-brand"><a href="{{ url_for('index') }}">SecretShare</a> <span class="label label-warning">Beta</span></div>
             </div>
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav">
-                    <li><a href=""></a></li>
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
-                    <li><a href=""></a></li>
-                </ul>
-            </div>
+{#            TODO: Uncomment when static pages added #}
+{#            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">#}
+{#                <ul class="nav navbar-nav">#}
+{#                    <li><a href=""></a></li>#}
+{#                </ul>#}
+{#                <ul class="nav navbar-nav navbar-right">#}
+{#                    <li><a href=""></a></li>#}
+{#                </ul>#}
+{#            </div>#}
         </div>
     </nav>
 {% endblock %}
@@ -45,7 +47,7 @@
 
      <div class="navbar navbar-text navbar-inverse navbar-fixed-bottom center-block">
     <p class="navbar-text" align="center">© 2020 Copyright:
-        <a href="https://www.icoqu.com/">icoqu.com</a> under MIT license. Source code is avaliable at:<a href="https://github.com/Icoqu/SecretShare">https://github.com/Icoqu/SecretShare</a></p>
+        <a href="https://www.icoqu.com/">icoqu.com</a> under MIT license. Source code is available at:<a href="https://github.com/Icoqu/SecretShare">https://github.com/Icoqu/SecretShare</a></p>
 </div>
      </div>
  {% endblock %}
