@@ -1,0 +1,12 @@
+important:
+TODO: make redis configurable
+TODO: errors handling
+TODO: refactor flask application
+
+communication:
+TODO: send secret link via email
+TODO: send secret-passphrase via SMS
+miscellaneous:
+TODO: add locales
+TODO: add way to collect statistics
+TODO: add statistics panel
