@@ -1,19 +1,21 @@
 import datetime as dt
 from hashlib import md5
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from config import Config
 import random
 import base64
 import json
 import redis
 
 r = redis.Redis()
+c = Config()
 
 
 class Secret:
-    SALT = 'app.secret_keyas'
+    SALT = c.SECRET_KEY
     bSALT = bytes(SALT, 'UTF-8')
 
     def __init__(self, secret_value: str, ttl, passphrase = '', created_at: str = str(dt.datetime.utcnow()),
@@ -55,21 +57,25 @@ class Secret:
         if secret:
             secret = json.loads(secret)
             return Secret(secret['secret'], ttl=secret['ttl'], created_at=secret['created_at'], encrypted=True,
-                      secret_id=secret_id)
+                      secret_id=secret_id, passphrase=secret['passphrase'])
         else:
             return False
 
     def read(self, passphrase: str = ''):
-        Secret.destroy(self)
         if dt.datetime.utcnow() < self.created_at + dt.timedelta(hours=self.ittl):
             kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=self.bSALT, iterations=100000,
                              backend=default_backend())
             bpassphrase = bytes(passphrase, 'UTF-8')
             key = base64.urlsafe_b64encode(kdf.derive(bpassphrase))
             f = Fernet(key)
-            decrypted = f.decrypt(eval(self.secret))
-            return decrypted.decode()
+            try:
+                decrypted = f.decrypt(eval(self.secret)).decode()
+            except InvalidToken:
+                return False
+            Secret.destroy(self)
+            return decrypted
         else:
+            Secret.destroy(self)
             return False
 
     def __repr__(self):

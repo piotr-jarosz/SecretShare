@@ -9,5 +9,5 @@ class SecretForm(FlaskForm):
     submit = SubmitField('Create secret!')
 
 class ReadSecretForm(FlaskForm):
-    passphrase = PasswordField('Passphrase', validators=[DataRequired()])
+    passphrase = PasswordField('Passphrase')
     submit = SubmitField('Open my secret!')
