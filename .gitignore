@@ -27,6 +27,7 @@ coverage.xml
 instance/
 .webassets-cache
 .flaskenv
+logs/ 
 
 # Environments
 .env
