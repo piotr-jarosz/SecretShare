@@ -13,5 +13,5 @@ def not_found_error(error):
 
 @bp.app_errorhandler(500)
 def internal_error(error):
-    app.logger.error(error)
-    return render_template('errors/500.html'), 500
+    # app.logger.error(error)
+    return render_template('500.html'), 500

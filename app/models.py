@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from random import randint
 from base64 import urlsafe_b64encode
-from app import r, c
+from app import current_app
 import json
 
 
@@ -39,14 +39,14 @@ class Secret:
             'passphrase': self.passphrase,
             'ttl': self.ttl
         })}
-        r.mset(secret)
+        current_app.redis.mset(secret)
         return self.secret_id
 
     def destroy(self):
-        r.delete(self.secret_id)
+        current_app.redis.delete(self.secret_id)
 
     def load(secret_id: str):
-        secret = r.get(secret_id)
+        secret = current_app.redis.get(secret_id)
         if secret:
             secret = json.loads(secret)
             return Secret(secret['secret'], ttl=int(secret['ttl']), created_at=secret['created_at'], encrypted=True,
