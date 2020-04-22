@@ -8,7 +8,7 @@ def not_found_error(error):
         '<p><b>404 Not Found</b></p> <p>The requested URL was not found on the server. If you entered the URL manually '
         'please check your spelling and try again.</p>')
     flash(message, category='danger')
-    return redirect(url_for('index')), 404
+    return redirect(url_for('index'))
 
 
 @app.errorhandler(500)
