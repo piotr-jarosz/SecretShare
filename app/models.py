@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from random import randint
 from base64 import urlsafe_b64encode
-from app import r, c
+from app import current_app
 import json
 
 
@@ -14,7 +14,7 @@ class Secret:
 
     def __init__(self, secret_value: str, ttl: int, passphrase='', created_at: str = str(dt.datetime.utcnow()),
                  encrypted=False, secret_id: str = ''):
-        self.ttl = ttl
+        self.ttl = int(ttl)
         self.passphrase = True if passphrase else False
         if not encrypted:
             kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=bytes(c.SECRET_KEY, 'UTF-8'), iterations=100000,
@@ -27,6 +27,7 @@ class Secret:
         else:
             self.secret = secret_value
         self.created_at = dt.datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S.%f')
+        self.end_of_life = self.created_at + dt.timedelta(hours=self.ttl)
         sid = str(self.created_at) + ''.join([str(randint(0, 10)) for _ in range(10)])
         sid = sid.encode()
         self.secret_id = secret_id if secret_id else md5(sid).hexdigest()
@@ -38,14 +39,14 @@ class Secret:
             'passphrase': self.passphrase,
             'ttl': self.ttl
         })}
-        r.mset(secret)
+        current_app.redis.mset(secret)
         return self.secret_id
 
     def destroy(self):
-        r.delete(self.secret_id)
+        current_app.redis.delete(self.secret_id)
 
     def load(secret_id: str):
-        secret = r.get(secret_id)
+        secret = current_app.redis.get(secret_id)
         if secret:
             secret = json.loads(secret)
             return Secret(secret['secret'], ttl=int(secret['ttl']), created_at=secret['created_at'], encrypted=True,
@@ -54,7 +55,7 @@ class Secret:
             return False
 
     def read(self, passphrase: str = ''):
-        if dt.datetime.utcnow() < self.created_at + dt.timedelta(hours=self.ttl):
+        if dt.datetime.utcnow() < self.end_of_life:
             kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=bytes(c.SECRET_KEY, 'UTF-8'), iterations=100000,
                              backend=default_backend())
             bpassphrase = bytes(passphrase, 'UTF-8')

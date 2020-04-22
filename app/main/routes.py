@@ -1,31 +1,26 @@
 import json
 from flask import render_template, flash as flask_flash, redirect, url_for, request
-from app.forms import SecretForm, ReadSecretForm
-from app import app
-from models import Secret
+from app.main.forms import SecretForm, ReadSecretForm
+from app.main import bp
+from app.models import Secret
 from functools import partial
 
 flash = partial(flask_flash, category='info')
 
-@app.route("/secret", methods=['GET', 'POST'])
-@app.route("/secret/", methods=['GET', 'POST'])
+
+#TODO: Issue on the root_path
+@bp.route("/", methods=['GET', 'POST'])
 def index():
     form = SecretForm()
     if form.validate_on_submit():
         flash('Secret created!')
         secret = Secret(form.secret.data, form.ttl.data, passphrase=form.passphrase.data)
         secret_id = secret.save()
-        return redirect('/secret/' + secret_id + '/admin')
+        return redirect(url_for('main.secret_admin', secret_id=secret_id))
     return render_template('index.html', title='Create your secret now!', form=form)
 
 
-@app.route('/')
-def index_redirect():
-    return redirect(url_for('index'))
-
-
-@app.route("/secret/<secret_id>", methods=['GET', 'POST', 'DELETE'])
-@app.route("/secret/<secret_id>/", methods=['GET', 'POST', 'DELETE'])
+@bp.route("/<secret_id>", methods=['GET', 'POST', 'DELETE'])
 def read_secret(secret_id: str):
     s = Secret.load(secret_id)
     if request.method == 'DELETE':
@@ -46,8 +41,8 @@ def read_secret(secret_id: str):
     return render_template('secret.html', passphrase=passphrase, secret_id=secret_id, form=form)
 
 
-@app.route("/secret/<secret_id>/admin")
-@app.route("/secret/<secret_id>/admin/")
+@bp.route("/<secret_id>/admin")
+@bp.route("/<secret_id>/admin/")
 def secret_admin(secret_id):
     secret = Secret.load(secret_id)
     return render_template('secret_admin.html', secret=secret, secret_id=secret_id)
