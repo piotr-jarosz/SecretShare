@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from random import randint
 from base64 import urlsafe_b64encode
-from app import current_app
+from flask import current_app
 import json
 
 
@@ -17,7 +17,7 @@ class Secret:
         self.ttl = int(ttl)
         self.passphrase = True if passphrase else False
         if not encrypted:
-            kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=bytes(c.SECRET_KEY, 'UTF-8'), iterations=100000,
+            kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=bytes(current_app.config['SECRET_KEY'], 'UTF-8'), iterations=100000,
                              backend=default_backend())
             bpassphrase = bytes(passphrase, 'UTF-8')
             key = urlsafe_b64encode(kdf.derive(bpassphrase))
@@ -56,7 +56,7 @@ class Secret:
 
     def read(self, passphrase: str = ''):
         if dt.datetime.utcnow() < self.end_of_life:
-            kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=bytes(c.SECRET_KEY, 'UTF-8'), iterations=100000,
+            kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=bytes(current_app.config['SECRET_KEY'], 'UTF-8'), iterations=100000,
                              backend=default_backend())
             bpassphrase = bytes(passphrase, 'UTF-8')
             key = urlsafe_b64encode(kdf.derive(bpassphrase))

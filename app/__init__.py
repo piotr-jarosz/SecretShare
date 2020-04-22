@@ -8,20 +8,22 @@ import os
 
 c = Config()
 b = Bootstrap()
-r = Redis()
-
+r = Redis(host=c.REDIS_HOST, port=c.REDIS_PORT, password=c.REDIS_PASSWORD)
 
 def create_app(config_class=c):
     app = Flask(__name__)
     app.config.from_object(config_class)
     b.init_app(app)
-    app.redis = r.__init__(host=app.config['REDIS_HOST'], port=app.config['REDIS_PORT'], password=app.config['REDIS_PASSWORD'])
+    app.redis = r
+
+    from app.main import bp as main_bp
+    app.register_blueprint(main_bp)
 
     from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp)
 
-    from app.main import bp as main_bp
-    app.register_blueprint(main_bp, url_prefix='/secret')
+    from app.secret import bp as secret_bp
+    app.register_blueprint(secret_bp, url_prefix='/secret')
 
     if not app.debug:
         lp = app.config['LOGS_PATH']

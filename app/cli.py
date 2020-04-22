@@ -1,4 +1,4 @@
-from app import r
+from flask import current_app
 
 
 def register(app):
