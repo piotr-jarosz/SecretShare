@@ -6,6 +6,11 @@
 {% block head %}
     {{super()}}
     {{fixes.ie8()}}
+    <style>
+.navbar-text-override {
+    float: none;
+}
+    </style>
 {% endblock %}
 
 {% block navbar %}
@@ -46,7 +51,7 @@
         {% endblock %}
 
      <div class="navbar navbar-text navbar-inverse navbar-fixed-bottom center-block">
-    <p class="navbar-text" align="center">© 2020 Copyright:
+    <p class="navbar-text navbar-text-override" align="center">© 2020 Copyright:
         <a href="https://www.icoqu.com/">icoqu.com</a> under MIT license. Source code is available at:<a href="https://github.com/Icoqu/SecretShare">https://github.com/Icoqu/SecretShare</a></p>
 </div>
      </div>
