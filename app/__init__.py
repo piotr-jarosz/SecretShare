@@ -1,13 +1,16 @@
 from flask import Flask
 from config import Config
 from flask_bootstrap import Bootstrap
+from redis import Redis
 import logging
 from logging.handlers import RotatingFileHandler
 import os
 
 app = Flask(__name__)
-app.config.from_object(Config)
+c = Config()
+app.config.from_object(c)
 Bootstrap(app)
+r = Redis(host=app.config['REDIS_HOST'], port=app.config['REDIS_PORT'], password=app.config['REDIS_PASSWORD'])
 
 if not app.debug:
     lp = Config.LOGS_PATH
