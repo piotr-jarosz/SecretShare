@@ -8,6 +8,7 @@ from functools import partial
 flash = partial(flask_flash, category='info')
 
 
+#TODO: Issue on the root_path
 @bp.route("/", methods=['GET', 'POST'])
 def index():
     form = SecretForm()
