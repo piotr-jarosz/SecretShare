@@ -14,7 +14,7 @@ class Secret:
 
     def __init__(self, secret_value: str, ttl: int, passphrase='', created_at: str = str(dt.datetime.utcnow()),
                  encrypted=False, secret_id: str = ''):
-        self.ttl = ttl
+        self.ttl = int(ttl)
         self.passphrase = True if passphrase else False
         if not encrypted:
             kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=bytes(c.SECRET_KEY, 'UTF-8'), iterations=100000,
@@ -27,6 +27,7 @@ class Secret:
         else:
             self.secret = secret_value
         self.created_at = dt.datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S.%f')
+        self.end_of_life = self.created_at + dt.timedelta(hours=self.ttl)
         sid = str(self.created_at) + ''.join([str(randint(0, 10)) for _ in range(10)])
         sid = sid.encode()
         self.secret_id = secret_id if secret_id else md5(sid).hexdigest()
@@ -54,7 +55,7 @@ class Secret:
             return False
 
     def read(self, passphrase: str = ''):
-        if dt.datetime.utcnow() < self.created_at + dt.timedelta(hours=self.ttl):
+        if dt.datetime.utcnow() < self.end_of_life:
             kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=bytes(c.SECRET_KEY, 'UTF-8'), iterations=100000,
                              backend=default_backend())
             bpassphrase = bytes(passphrase, 'UTF-8')

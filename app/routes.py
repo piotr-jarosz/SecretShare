@@ -2,7 +2,7 @@ import json
 from flask import render_template, flash as flask_flash, redirect, url_for, request
 from app.forms import SecretForm, ReadSecretForm
 from app import app
-from models import Secret
+from app.models import Secret
 from functools import partial
 
 flash = partial(flask_flash, category='info')
