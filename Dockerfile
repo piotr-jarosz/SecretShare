@@ -14,7 +14,7 @@ COPY app app
 COPY secretshare.py config.py boot.sh ./
 RUN chmod +x boot.sh
 
-ENV FLASK_APP SC_flask.py
+ENV FLASK_APP secretshare.py
 
 RUN chown -R service:service ./
 USER service
