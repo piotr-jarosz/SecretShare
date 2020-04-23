@@ -1,27 +1,32 @@
 import json
-from flask import render_template, flash as flask_flash, redirect, url_for, request
+from flask import render_template, flash as flask_flash, redirect, url_for, request, current_app
 from app.secret.forms import SecretForm, ReadSecretForm
 from app.secret import bp
 from app.models import Secret
 from functools import partial
+from redis import ConnectionError
 
 flash = partial(flask_flash, category='info')
 
 
-#TODO: Issue on the root_path
 @bp.route("/", methods=['GET', 'POST'])
 def index():
     form = SecretForm()
     if form.validate_on_submit():
-        flash('Secret created!')
         secret = Secret(form.secret.data, form.ttl.data, passphrase=form.passphrase.data)
-        secret_id = secret.save()
+        try:
+            secret_id = secret.save()
+        except ConnectionError as e:
+            current_app.logger.error(e)
+            return 500
+        if secret_id:
+            flash('Secret created!')
         return redirect(url_for('secret.secret_admin', secret_id=secret_id))
-    return render_template('index.html', title='Create your secret now!', form=form)
+    return render_template('secrets/index.html', title='Create your secret now!', form=form)
 
 
 @bp.route("/<secret_id>/", methods=['GET', 'POST', 'DELETE'])
-@bp.route("/<secret_id>", methods=['GET', 'POST', 'DELETE'])
+# @bp.route("/<secret_id>", methods=['GET', 'POST', 'DELETE'])
 def read_secret(secret_id: str):
     s = Secret.load(secret_id)
     if request.method == 'DELETE':
@@ -42,7 +47,6 @@ def read_secret(secret_id: str):
     return render_template('secret.html', passphrase=passphrase, secret_id=secret_id, form=form)
 
 
-@bp.route("/<secret_id>/admin")
 @bp.route("/<secret_id>/admin/")
 def secret_admin(secret_id):
     secret = Secret.load(secret_id)

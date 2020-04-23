@@ -11,7 +11,7 @@ b = Bootstrap()
 r = Redis(host=c.REDIS_HOST, port=c.REDIS_PORT, password=c.REDIS_PASSWORD)
 
 def create_app(config_class=c):
-    app = Flask(__name__)
+    app = Flask(__name__, static_url_path='/static')
     app.config.from_object(config_class)
     b.init_app(app)
     app.redis = r
