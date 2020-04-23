@@ -1,9 +1,11 @@
 important:
 TODO: remove expired keys from redis
-TODO: refactor flask application
+TODO: Add some testing
+
 
 
 miscellaneous:
+TODO: improve password generator
 TODO: add locales
 TODO: add way to collect statistics
 TODO: add statistics panel

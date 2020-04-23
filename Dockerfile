@@ -11,7 +11,7 @@ RUN venv/bin/pip install -r requirements.txt
 RUN venv/bin/pip install gunicorn
 
 COPY app app
-COPY SC_flask.py config.py models.py boot.sh ./
+COPY secretshare.py config.py boot.sh ./
 RUN chmod +x boot.sh
 
 ENV FLASK_APP SC_flask.py
