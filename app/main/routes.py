@@ -7,4 +7,8 @@ def index():
 
 @bp.route("/help/")
 def help():
-    pass
+    return render_template('static/about.html')
+
+@bp.route("/password-generator/")
+def password_generator():
+    return render_template('static/password_generator.html')
