@@ -26,7 +26,6 @@ def index():
 
 
 @bp.route("/<secret_id>/", methods=['GET', 'POST', 'DELETE'])
-# @bp.route("/<secret_id>", methods=['GET', 'POST', 'DELETE'])
 def read_secret(secret_id: str):
     s = Secret.load(secret_id)
     if request.method == 'DELETE':
@@ -44,10 +43,10 @@ def read_secret(secret_id: str):
     else:
         form = False
         passphrase = False
-    return render_template('secret.html', passphrase=passphrase, secret_id=secret_id, form=form)
+    return render_template('secrets/secret.html', passphrase=passphrase, secret_id=secret_id, form=form)
 
 
 @bp.route("/<secret_id>/admin/")
 def secret_admin(secret_id):
     secret = Secret.load(secret_id)
-    return render_template('secret_admin.html', secret=secret, secret_id=secret_id)
+    return render_template('secrets/secret_admin.html', secret=secret, secret_id=secret_id)
