@@ -10,7 +10,7 @@ def not_found_error(error):
         'If you entered the URL manually ' +
         'please check your spelling and try again.</p>')
     flash(message, category='danger')
-    return redirect(url_for('secret.index'))
+    return render_template('errors/404.html'), 404
 
 
 @bp.app_errorhandler(500)
