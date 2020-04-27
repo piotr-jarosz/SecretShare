@@ -1,11 +1,11 @@
 important:
 TODO: remove expired keys from redis
 TODO: Add some testing
-
+TODO: FE fixes for mobile view
 
 
 miscellaneous:
-TODO: improve password generator
+TODO: password generator - add checkbox for upper case, lower case, digits, etc.
 TODO: add locales
 TODO: add way to collect statistics
 TODO: add statistics panel
