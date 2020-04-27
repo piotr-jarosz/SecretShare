@@ -1,25 +1,6 @@
 {% extends "base.html" %}
 
- {% block content %}
-         <div class="container">
-         {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-<div class="alert alert-{{ category  }}" role="alert">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-        {% block scontent %}{% endblock %}
-{% block footer %}
-<!-- Footer -->
-<footer class="page-footer font-small special-color-dark pt-4">
- <!-- Copyright -->
-     <div class="footer-copyright text-center py-3">© 2020 Copyright:
-         <a href="https://www.icoqu.com/">icoqu.com</a> under MIT license. Source code is available at:<a href="https://github.com/Icoqu/SecretShare">https://github.com/Icoqu/SecretShare</a></p>
-     </div>
-  <!-- Copyright -->
 
-</footer>
-<!-- Footer -->
+
 {%- endblock footer %}
                    {% endblock %}
