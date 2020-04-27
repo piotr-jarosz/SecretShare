@@ -1,5 +1,5 @@
 import json
-from flask import render_template, flash as flask_flash, redirect, url_for, request, current_app
+from flask import render_template, flash as flask_flash, redirect, url_for, request, current_app, abort
 from app.secret.forms import SecretForm, ReadSecretForm
 from app.secret import bp
 from app.models import Secret
@@ -43,6 +43,7 @@ def read_secret(secret_id: str):
     else:
         form = False
         passphrase = False
+        abort(404)
     return render_template('secrets/secret.html', passphrase=passphrase, secret_id=secret_id, form=form)
 
 
