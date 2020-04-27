@@ -1,12 +1,15 @@
-from flask import current_app
-
-
 def register(app):
-    @app.cli.group
+    @app.cli.group()
     def redis():
-        """Redis data commands."""
+        """Redis commands."""
         pass
 
-    # @redis.command()
-    # def purge():
-    #     r.flushall()
+    #
+    @redis.command('purge')
+    def purge():
+        try:
+            app.redis.flushall()
+        except Exception as e:
+            app.logger.error(e)
+            exit(1)
+        app.logger.info('Redis DB purged')

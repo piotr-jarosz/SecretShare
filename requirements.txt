@@ -4,6 +4,7 @@ cryptography==2.9
 dominate==2.5.1
 Flask==1.1.1
 Flask-Bootstrap==3.3.7.1
+Flask-Moment==0.9.0
 flask-redis==0.4.0
 Flask-WTF==0.14.3
 itsdangerous==1.1.0

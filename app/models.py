@@ -40,6 +40,7 @@ class Secret:
             'ttl': self.ttl
         })}
         current_app.redis.mset(secret)
+        current_app.redis.expire(self.secret_id, dt.timedelta(hours=self.ttl))
         return self.secret_id
 
     def destroy(self):
