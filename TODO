@@ -1,7 +1,8 @@
 important:
-TODO: remove expired keys from redis
 TODO: Add some testing
 TODO: FE fixes for mobile view
+TODO: refactor from Active Record to registry pattern
+TODO: fix exception on admin when secret doesn't exist
 
 
 miscellaneous:
