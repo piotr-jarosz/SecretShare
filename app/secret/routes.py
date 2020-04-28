@@ -35,7 +35,8 @@ def read_secret(secret_id: str):
         passphrase = s.passphrase
         form = ReadSecretForm()
         if form.validate_on_submit():
-            secret = s.read(passphrase=form.passphrase.data)
+            from html import escape
+            secret = escape(s.read(passphrase=form.passphrase.data))
             if secret:
                 return json.dumps({'secret': secret})
             else:
