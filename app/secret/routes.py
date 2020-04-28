@@ -3,10 +3,10 @@ from flask import render_template, flash as flask_flash, redirect, url_for, requ
 from app.secret.forms import SecretForm, ReadSecretForm
 from app.secret import bp
 from app.models import Secret
-from functools import partial
 from redis import ConnectionError
 
-flash = partial(flask_flash, category='info')
+
+def flash(message): flask_flash(message, category='info')
 
 
 @bp.route("/", methods=['GET', 'POST'])
