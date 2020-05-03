@@ -6,15 +6,28 @@
 {% block head %}
     {{super()}}
     {{fixes.ie8()}}
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png"') }}">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
-<link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
-<link rel="manifest" href="{{ url_for('static', filename='/site.webmanifest') }}">
-    <style>
-.navbar-text-override {
-    float: none;
-}
-    </style>
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+<style>
+    /* Sticky footer styles
+-------------------------------------------------- */
+    html {
+        position: relative;
+        min-height: 100%;
+    }
+    body {
+        margin-bottom: 60px; /* Margin bottom by footer height */
+    }
+    .footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 60px; /* Set the fixed height of the footer here */
+        line-height: 60px; /* Vertically center the text there */
+    }
+</style>
 {% endblock %}
 
 {% block navbar %}
@@ -41,23 +54,27 @@
         </div>
     </nav>
 {% endblock %}
- {% block content %}
-         <div class="container">
-         {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-<div class="alert alert-{{ category  }}" role="alert">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-        {% block scontent %}
-        {% endblock %}
-
-     <div class="navbar navbar-text navbar-inverse navbar-fixed-bottom center-block">
-    <p class="navbar-text navbar-text-override" align="center">© 2020 Copyright:
-        <a href="https://www.icoqu.com/">icoqu.com</a> under MIT license. Source code is available at:<a href="https://github.com/Icoqu/SecretShare">https://github.com/Icoqu/SecretShare</a></p>
-</div>
+{% block content %}
+    <div class="container" role="main">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category  }}" role="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block scontent %}{% endblock %}
+    </div>
+    {{super()}}
+<!-- Footer -->
+    <footer class="footer">
+     <div class="navbar-fixed-bottom navbar navbar-inverse footer-copyright text-center py-3"><span class="text-muted">© 2020 Copyright:
+         <a href="https://github.com/piotr-jarosz">Piotr Jarosz</a> under MIT license. Source code is available at:<a href="https://github.com/Icoqu/SecretShare">https://github.com/Icoqu/SecretShare</a></span>
      </div>
- {% endblock %}
-</body>
-</html>
+    </footer>
+{% endblock content %}
+
+{% block scripts %}
+    {{ super() }}
+    {{ moment.include_moment() }}
+{% endblock %}

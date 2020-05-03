@@ -5,16 +5,19 @@ from redis import Redis
 import logging
 from logging.handlers import RotatingFileHandler
 import os
+from flask_moment import Moment
 
 c = Config()
 b = Bootstrap()
-r = Redis(host=c.REDIS_HOST, port=c.REDIS_PORT, password=c.REDIS_PASSWORD)
+r = Redis(host=c.REDIS_HOST, port=c.REDIS_PORT, password=c.REDIS_PASSWORD, health_check_interval=c.REDIS_HEALTHCHECK)
+m = Moment()
 
 def create_app(config_class=c):
     app = Flask(__name__, static_url_path='/static')
     app.config.from_object(config_class)
     b.init_app(app)
     app.redis = r
+    m.init_app(app)
 
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
