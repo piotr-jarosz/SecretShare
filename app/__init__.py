@@ -9,7 +9,7 @@ from flask_moment import Moment
 
 c = Config()
 b = Bootstrap()
-r = Redis(host=c.REDIS_HOST, port=c.REDIS_PORT, password=c.REDIS_PASSWORD)
+r = Redis(host=c.REDIS_HOST, port=c.REDIS_PORT, password=c.REDIS_PASSWORD, health_check_interval=c.REDIS_HEALTHCHECK)
 m = Moment()
 
 def create_app(config_class=c):
