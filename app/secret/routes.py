@@ -30,6 +30,7 @@ def read_secret(secret_id: str):
     s = Secret.load(secret_id)
     if request.method == 'DELETE':
         s.destroy()
+        flash('Secret destroyed!')
         return 'Ok'
     if s:
         passphrase = s.passphrase

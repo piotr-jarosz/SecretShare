@@ -7,6 +7,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from random import randint
 from base64 import urlsafe_b64encode
 from flask import current_app
+from app import r
 import json
 
 
@@ -39,15 +40,15 @@ class Secret:
             'passphrase': self.passphrase,
             'ttl': self.ttl
         })}
-        current_app.redis.mset(secret)
-        current_app.redis.expire(self.secret_id, dt.timedelta(hours=self.ttl))
+        r.mset(secret)
+        r.expire(self.secret_id, dt.timedelta(hours=self.ttl))
         return self.secret_id
 
     def destroy(self):
-        current_app.redis.delete(self.secret_id)
+        r.delete(self.secret_id)
 
     def load(secret_id: str):
-        secret = current_app.redis.get(secret_id)
+        secret = r.get(secret_id)
         if secret:
             secret = json.loads(secret)
             return Secret(secret['secret'], ttl=int(secret['ttl']), created_at=secret['created_at'], encrypted=True,
@@ -65,7 +66,7 @@ class Secret:
             try:
                 decrypted = f.decrypt(eval(self.secret)).decode()
             except InvalidToken:
-                return False
+                return 404
             Secret.destroy(self)
             return decrypted
         else:
