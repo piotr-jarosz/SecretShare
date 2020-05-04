@@ -1,4 +1,4 @@
-from flask import Flask, current_app
+from flask import Flask, current_app, request
 from config import Config
 from flask_bootstrap import Bootstrap
 from redis import Redis
@@ -7,10 +7,13 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 from flask_moment import Moment
+from flask_babel import Babel
 
 c = Config()
 b = Bootstrap()
 m = Moment()
+babel = Babel()
+
 
 
 def create_app(config_class=c):
@@ -23,6 +26,7 @@ def create_app(config_class=c):
     else:
         app.redis = Redis(host=c.REDIS_HOST, port=c.REDIS_PORT, password=c.REDIS_PASSWORD, health_check_interval=c.REDIS_HEALTHCHECK)
     m.init_app(app)
+    babel.init_app(app)
 
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
@@ -48,6 +52,11 @@ def create_app(config_class=c):
         app.logger.info('Application start')
 
     return app
+
+
+@babel.localeselector
+def get_locale():
+    return request.accept_languages.best_match(current_app.config['LANGUAGES'])
 
 
 from app import models

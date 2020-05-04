@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
 {% block scontent %}
-            <h1>No secrets here!</h1>
-            <p><a href="{{ url_for('secret.index') }}">Let's create new secret!</a></p>
+            <h1>{{ _('No secrets here!') }}</h1>
+            <p><a href="{{ url_for('secret.index') }}">{{ _('Let\'s create new secret!') }}</a></p>
 {% endblock scontent %}

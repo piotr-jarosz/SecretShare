@@ -1,0 +1,169 @@
+# Polish translations for PROJECT.
+# Copyright (C) 2020 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2020-05-05 14:28+0200\n"
+"PO-Revision-Date: 2020-05-04 17:39+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: pl\n"
+"Language-Team: pl <LL@li.org>\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && "
+"(n%100<10 || n%100>=20) ? 1 : 2)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.8.0\n"
+
+#: app/errors/handlers.py:10
+msgid ""
+"<p><b>404 Not Found</b></p> <p>The requested URL: <a "
+"href=\"{path}\">{path}</i></a> was not found on the server. If you "
+"entered the URL manually please check your spelling and try again.</p>"
+msgstr ""
+
+#: app/main/routes.py:15
+msgid "Password generator"
+msgstr ""
+
+#: app/secret/forms.py:8
+msgid "Secret"
+msgstr ""
+
+#: app/secret/forms.py:9 app/secret/forms.py:16
+msgid "Passphrase"
+msgstr ""
+
+#: app/secret/forms.py:10
+msgid "Burn after:"
+msgstr ""
+
+#: app/secret/forms.py:10
+msgid "1 hour"
+msgstr ""
+
+#: app/secret/forms.py:10
+msgid "3 hours"
+msgstr ""
+
+#: app/secret/forms.py:10
+msgid "6 hours"
+msgstr ""
+
+#: app/secret/forms.py:11
+msgid "12 hours"
+msgstr ""
+
+#: app/secret/forms.py:11
+msgid "24 hours"
+msgstr ""
+
+#: app/secret/forms.py:17
+msgid "Open my secret!"
+msgstr ""
+
+#: app/secret/routes.py:33
+msgid "Create your secret now!"
+msgstr ""
+
+#: app/secret/routes.py:41
+msgid "Secret destroyed!"
+msgstr ""
+
+#: app/templates/base.html:7
+msgid "SecretShare! Create your secret now!"
+msgstr ""
+
+#: app/templates/errors/404.html:4 app/templates/secrets/secret.html:29
+#: app/templates/secrets/secret.html:47
+#: app/templates/secrets/secret_admin.html:22
+msgid "No secrets here!"
+msgstr ""
+
+#: app/templates/errors/404.html:5 app/templates/errors/500.html:7
+#: app/templates/secrets/secret.html:48
+msgid "Let's create new secret!"
+msgstr ""
+
+#: app/templates/errors/500.html:4
+msgid "500 Unexpected error"
+msgstr ""
+
+#: app/templates/errors/500.html:5
+msgid "An unexpected error has occurred"
+msgstr ""
+
+#: app/templates/errors/500.html:6
+msgid "The administrator has been notified. Sorry for the inconvenience!"
+msgstr ""
+
+#: app/templates/secrets/index.html:5
+msgid "Create your secret!"
+msgstr ""
+
+#: app/templates/secrets/secret.html:6
+msgid "Open your secret"
+msgstr ""
+
+#: app/templates/secrets/secret.html:27
+msgid "Your secret:"
+msgstr ""
+
+#: app/templates/secrets/secret.html:29
+msgid "Probably you need to re-check URL or passphrase"
+msgstr ""
+
+#: app/templates/secrets/secret.html:34
+msgid "Oops! Something went wrong."
+msgstr ""
+
+#: app/templates/secrets/secret_admin.html:6
+msgid "Share link:"
+msgstr ""
+
+#: app/templates/secrets/secret_admin.html:9
+msgid "Created at:"
+msgstr ""
+
+#: app/templates/secrets/secret_admin.html:10
+msgid "End of life:"
+msgstr ""
+
+#: app/templates/secrets/secret_admin.html:11
+msgid ""
+"Burn\n"
+"                    the secret!"
+msgstr ""
+
+#: app/templates/static/password_generator.html:5
+msgid "Generate your password!"
+msgstr ""
+
+#: app/templates/static/password_generator.html:10
+msgid "Lenght:"
+msgstr ""
+
+#: app/templates/static/password_generator.html:11
+msgid "Lenght"
+msgstr ""
+
+#: app/templates/static/password_generator.html:15
+msgid "Special characters:"
+msgstr ""
+
+#: app/templates/static/password_generator.html:16
+msgid "Special Characters"
+msgstr ""
+
+#: app/templates/static/password_generator.html:19
+msgid "Your password:"
+msgstr ""
+
+#: app/templates/static/password_generator.html:26
+msgid "Generate password!"
+msgstr ""
+

@@ -1,12 +1,20 @@
 import json
-from flask import render_template, flash as flask_flash, redirect, url_for, request, current_app, abort
-from app.secret.forms import SecretForm, ReadSecretForm
-from app.secret import bp
-from app.models import Secret
+
+from flask import render_template, flash as flask_flash, redirect, url_for, request, current_app, abort, g
 from redis import ConnectionError
+from flask_babel import _, get_locale
+
+from app.models import Secret
+from app.secret import bp
+from app.secret.forms import SecretForm, ReadSecretForm
 
 
 def flash(message): flask_flash(message, category='info')
+
+
+@bp.before_request
+def before_request():
+    g.locale = str(get_locale())
 
 
 @bp.route("/", methods=['GET', 'POST'])
@@ -22,7 +30,7 @@ def index():
         if secret_id:
             flash('Secret created!')
         return redirect(url_for('secret.secret_admin', secret_id=secret_id))
-    return render_template('secrets/index.html', title='Create your secret now!', form=form)
+    return render_template('secrets/index.html', title=_('Create your secret now!'), form=form)
 
 
 @bp.route("/<secret_id>/", methods=['GET', 'POST', 'DELETE'])
@@ -30,7 +38,7 @@ def read_secret(secret_id: str):
     s = Secret.load(secret_id)
     if request.method == 'DELETE':
         s.destroy()
-        flash('Secret destroyed!')
+        flash(_('Secret destroyed!'))
         return 'Ok'
     if s:
         passphrase = s.passphrase

@@ -3,11 +3,11 @@ TODO: Add some testing
 TODO: FE fixes for mobile view
 TODO: refactor from Active Record to registry pattern
 TODO: fix exception on admin when secret doesn't exist
+TODO: add locales
 
 
 miscellaneous:
 TODO: password generator - add checkbox for upper case, lower case, digits, etc.
-TODO: add locales
 TODO: add way to collect statistics
 TODO: add statistics panel
 
