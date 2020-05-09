@@ -18,7 +18,7 @@ MarkupSafe==1.1.1
 pycparser==2.20
 python-dotenv==0.13.0
 pytz==2020.1
-redis==3.5.0
+redis==3.5.1
 six==1.14.0
 sortedcontainers==2.1.0
 visitor==0.1.3
