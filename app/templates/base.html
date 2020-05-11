@@ -3,6 +3,10 @@
 {% import "bootstrap/fixes.html" as fixes %}
 {% import "bootstrap/utils.html" as utils %}
 
+{% block title %}
+    {% if title %}SecretShare: {{ title }}{% else %}{{ _('SecretShare! Create your secret now!') }}{% endif %}
+{% endblock %}
+
 {% block head %}
     {{super()}}
     {{fixes.ie8()}}
@@ -77,4 +81,5 @@
 {% block scripts %}
     {{ super() }}
     {{ moment.include_moment() }}
+    {{ moment.lang(g.locale) }}
 {% endblock %}

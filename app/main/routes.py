@@ -1,5 +1,6 @@
 from flask import redirect, url_for, render_template
 from app.main import bp
+from flask_babel import _
 
 @bp.route("/")
 def index():
@@ -11,4 +12,4 @@ def help():
 
 @bp.route("/password-generator/")
 def password_generator():
-    return render_template('static/password_generator.html')
+    return render_template('static/password_generator.html', title=_('Password generator'))

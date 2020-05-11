@@ -1,4 +1,4 @@
-from flask import Flask, current_app
+from flask import Flask, current_app, request
 from config import Config
 from flask_bootstrap import Bootstrap
 from redis import Redis
@@ -7,22 +7,33 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 from flask_moment import Moment
+from flask_babel import Babel
+from flask_mail import Mail
 
 c = Config()
 b = Bootstrap()
 m = Moment()
+babel = Babel()
+mail = Mail()
+
 
 
 def create_app(config_class=c):
     app = Flask(__name__, static_url_path='/static')
     app.config.from_object(config_class)
     b.init_app(app)
+    mail.init_app(app)
     if app.testing:
         app.redis = FakeStrictRedis()
         app.logger.info('Mocking redis')
     else:
-        app.redis = Redis(host=c.REDIS_HOST, port=c.REDIS_PORT, password=c.REDIS_PASSWORD, health_check_interval=c.REDIS_HEALTHCHECK)
+        app.redis = Redis(host=c.REDIS_HOST,
+                          port=c.REDIS_PORT,
+                          password=c.REDIS_PASSWORD,
+                          health_check_interval=c.REDIS_HEALTHCHECK,
+                          db=c.REDIS_DB_ID)
     m.init_app(app)
+    babel.init_app(app)
 
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
@@ -49,5 +60,9 @@ def create_app(config_class=c):
 
     return app
 
+
+@babel.localeselector
+def get_locale():
+    return request.accept_languages.best_match(current_app.config['LANGUAGES'])
 
 from app import models
