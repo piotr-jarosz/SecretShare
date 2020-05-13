@@ -1,16 +1,29 @@
 from flask_wtf import FlaskForm
-from wtforms import TextAreaField, PasswordField, SubmitField, SelectField
-from wtforms.validators import DataRequired
+from wtforms import TextAreaField, PasswordField, SubmitField, SelectField, StringField
+from wtforms.validators import DataRequired, Email
+from flask_babel import lazy_gettext as _l
 
 
 class SecretForm(FlaskForm):
-    secret = TextAreaField('Secret', validators=[DataRequired()])
-    passphrase = PasswordField('Passphrase')
-    ttl = SelectField('Burn after:', choices=[('1', '1 hour'), ('3', '3 hours'), ('6', '6 hours'),
-                                              ('12', '12 hours'), ('24', '24 hours')])
+    secret = TextAreaField(_l('Secret'), validators=[DataRequired()])
+    passphrase = PasswordField(_l('Passphrase'))
+    ttl = SelectField(_l('Burn after:'), choices=[('1', _l('1 hour')), ('3', _l('3 hours')), ('6', _l('6 hours')),
+                                                  ('12', _l('12 hours')), ('24', _l('24 hours'))],
+                      validators=[DataRequired()])
     submit = SubmitField('Create secret!')
 
 
 class ReadSecretForm(FlaskForm):
-    passphrase = PasswordField('Passphrase')
-    submit = SubmitField('Open my secret!')
+    passphrase = PasswordField(_l('Passphrase'))
+    submit = SubmitField(_l('Open my secret!'))
+
+
+class SendSecretLink(FlaskForm):
+    email = StringField(_l('Email'), validators=[DataRequired(), Email()])
+    submit_email = SubmitField(_l('Send!'))
+
+
+class SendPassphrase(FlaskForm):
+    country_code = SelectField(_l('Country code'), validators=[DataRequired()], choices=[('PL', '+48'), ])
+    msisdn = StringField(_l('Cellphone number'), validators=[DataRequired()])
+    submit_sms = SubmitField(_l('Send!'))

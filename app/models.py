@@ -66,7 +66,7 @@ class Secret:
             try:
                 decrypted = f.decrypt(eval(self.secret)).decode()
             except InvalidToken:
-                return 404
+                return False
             Secret.destroy(self)
             return decrypted
         else:
