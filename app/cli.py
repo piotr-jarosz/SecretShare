@@ -1,11 +1,11 @@
 import os
+import subprocess
 
 
 def register(app):
     @app.cli.group()
     def redis():
         """Redis commands."""
-        pass
 
     @redis.command('purge')
     def purge():
@@ -19,12 +19,11 @@ def register(app):
     @app.cli.group()
     def test():
         """Tests commands."""
-        pass
 
     @test.command('run')
     def run():
         try:
-            os.system('python -m unittest .')
+            subprocess.call('python -m unittest .', shell=False)
         except Exception as e:
             app.logger.error(e)
             exit(1)
@@ -38,16 +37,16 @@ def register(app):
     @translate.command()
     def update():
         """Update all languages."""
-        if os.system('pybabel extract -F babel.cfg -k _l -o messages.pot .'):
+        if subprocess.call('pybabel extract -F babel.cfg -k _l -o messages.pot .', shell=False):
             raise RuntimeError('extract command failed')
-        if os.system('pybabel update -i messages.pot -d app/translations'):
+        if subprocess.call('pybabel update -i messages.pot -d app/translations', shell=False):
             raise RuntimeError('update command failed')
         os.remove('messages.pot')
 
-    @translate.command()
-    def compile():
+    @translate.command('compile')
+    def compile_language():
         """Compile all languages."""
-        if os.system('pybabel compile -d app/translations'):
+        if subprocess.call('pybabel compile -d app/translations', shell=False):
             raise RuntimeError('compile command failed')
 
     import click
@@ -56,9 +55,9 @@ def register(app):
     @click.argument('lang')
     def init(lang):
         """Initialize a new language."""
-        if os.system('pybabel extract -F babel.cfg -k _l -o messages.pot .'):
+        if subprocess.call('pybabel extract -F babel.cfg -k _l -o messages.pot .', shell=False):
             raise RuntimeError('extract command failed')
-        if os.system(
-                'pybabel init -i messages.pot -d app/translations -l ' + lang):
+        if subprocess.call(
+                'pybabel init -i messages.pot -d app/translations -l ' + lang, shell=False):
             raise RuntimeError('init command failed')
         os.remove('messages.pot')
