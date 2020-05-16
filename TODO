@@ -15,3 +15,9 @@ TODO: password generator - add checkbox for upper case, lower case, digits, etc.
 communication:
 TODO: send secret link via email
 TODO: send secret-passphrase via SMS
+
+
+
+
+notes:
+consider migration of recaptcha to any version: https://github.com/piotr-jarosz/flask-recaptcha/blob/master/recaptcha2.py

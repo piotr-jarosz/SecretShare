@@ -1,7 +1,9 @@
 from flask_wtf import FlaskForm
+from flask_wtf.recaptcha import RecaptchaField
 from wtforms import TextAreaField, PasswordField, SubmitField, SelectField, StringField
 from wtforms.validators import DataRequired, Email
 from flask_babel import lazy_gettext as _l
+from config import Config
 
 
 class SecretForm(FlaskForm):
@@ -11,6 +13,7 @@ class SecretForm(FlaskForm):
                                                   ('12', _l('12 hours')), ('24', _l('24 hours'))],
                       validators=[DataRequired()])
     submit = SubmitField('Create secret!')
+    recaptcha = RecaptchaField() if Config.RECAPTCHA_PUBLIC_KEY else None
 
 
 class ReadSecretForm(FlaskForm):
