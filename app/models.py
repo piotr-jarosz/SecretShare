@@ -45,9 +45,14 @@ class Secret:
         return self.secret_id
 
     def destroy(self):
-        current_app.redis.delete(self.secret_id)
+        try:
+            current_app.redis.delete(self.secret_id)
+        except Exception as e:
+            return False
+        return True
 
-    def load(secret_id: str):
+    @classmethod
+    def load(cls, secret_id: str):
         secret = current_app.redis.get(secret_id)
         if secret:
             secret = json.loads(secret)
@@ -58,7 +63,9 @@ class Secret:
 
     def read(self, passphrase: str = ''):
         if dt.datetime.utcnow() < self.end_of_life:
-            kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=bytes(current_app.config['SECRET_KEY'], 'UTF-8'), iterations=100000,
+            kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32,
+                             salt=bytes(current_app.config['SECRET_KEY'], 'UTF-8'),
+                             iterations=100000,
                              backend=default_backend())
             bpassphrase = bytes(passphrase, 'UTF-8')
             key = urlsafe_b64encode(kdf.derive(bpassphrase))

@@ -15,6 +15,8 @@ class SecretForm(FlaskForm):
     submit = SubmitField('Create secret!')
     recaptcha = RecaptchaField() if Config.RECAPTCHA_PUBLIC_KEY else None
 
+class BurnSecretForm(FlaskForm):
+    submit = SubmitField(_l('Burn the Secret!'))
 
 class ReadSecretForm(FlaskForm):
     passphrase = PasswordField(_l('Passphrase'))
