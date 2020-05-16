@@ -26,7 +26,10 @@ class Config(object):
     MAIL_USE_SSL  = environ.get('MAIL_USE_TLS') is not None
     MAIL_USERNAME = environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = environ.get('MAIL_PASSWORD')
-    MAIL_DEBUG = True
+    RECAPTCHA_PUBLIC_KEY = environ.get('RECAPTCHA_PUBLIC_KEY') or None
+    RECAPTCHA_PRIVATE_KEY = environ.get('RECAPTCHA_PRIVATE_KEY') or None
 
     # Static config
+    RECAPTCHA_PARAMETERS = {'render': 'explicit'}
+    RECAPTCHA_DATA_ATTRS = {'theme': 'light'}
     LANGUAGES = ['en',] # 'pl']
