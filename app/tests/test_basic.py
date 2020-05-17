@@ -6,7 +6,7 @@ from flask import url_for
 from app import create_app
 from app import current_app
 from config import Config
-from app.models import Secret
+from app.models import Secret, Admin
 import traceback
 
 
@@ -66,7 +66,7 @@ class BasicTests(unittest.TestCase):
         }
         keys_count = len(self.app.redis.keys())
         response = self.app_client.post('/secret', follow_redirects=True, data=data)
-        self.assertEqual(keys_count + 1, len(self.app.redis.keys()))
+        self.assertEqual(keys_count + 2, len(self.app.redis.keys()))
         self.assertEqual(response.status_code, 200)
 
     @_logger
@@ -77,7 +77,7 @@ class BasicTests(unittest.TestCase):
         }
         keys_count = len(self.app.redis.keys())
         response = self.app_client.post('/secret', follow_redirects=True, data=data)
-        self.assertEqual(keys_count + 1, len(self.app.redis.keys()))
+        self.assertEqual(keys_count + 2, len(self.app.redis.keys()))
         self.assertEqual(response.status_code, 200)
 
     @_logger
@@ -148,9 +148,11 @@ class BasicTests(unittest.TestCase):
             'ttl': '1',
         }
         s = Secret(secret_value=data['secret'], ttl=int(data['ttl']))
-        secret_id = s.save()
+        a = Admin(s)
+        s.save()
+        admin_id = a.save()
         keys_count = len(self.app.redis.keys())
-        response = self.app_client.get(url_for('secret.secret_admin', secret_id=secret_id), follow_redirects=True)
+        response = self.app_client.get(url_for('secret.secret_admin', admin_id=admin_id), follow_redirects=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(keys_count, len(self.app.redis.keys()))
 

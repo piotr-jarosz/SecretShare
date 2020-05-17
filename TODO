@@ -1,20 +1,15 @@
 in progress:
-TODO: fix exception on admin when secret doesn't exist
+TODO: send secret-passphrase via SMS
 
 important:
 TODO: FE fixes for mobile view
 TODO: refactor from Active Record to registry pattern
-TODO: change admin link to something unique
 TODO: Notify creator about opened secret
 
 miscellaneous:
 TODO: add way to collect statistics
 TODO: add statistics panel
 TODO: password generator - add checkbox for upper case, lower case, digits, etc.
-
-communication:
-TODO: send secret link via email
-TODO: send secret-passphrase via SMS
 
 
 
