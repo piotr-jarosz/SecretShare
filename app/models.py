@@ -6,8 +6,8 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from random import randint
 from base64 import urlsafe_b64encode
-from flask import current_app
-from app import r
+# from flask import current_app
+from app import current_app
 import json
 
 
@@ -18,7 +18,8 @@ class Secret:
         self.ttl = int(ttl)
         self.passphrase = True if passphrase else False
         if not encrypted:
-            kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=bytes(current_app.config['SECRET_KEY'], 'UTF-8'), iterations=100000,
+            kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32,
+                             salt=bytes(current_app.config['SECRET_KEY'], 'UTF-8'), iterations=100000,
                              backend=default_backend())
             bpassphrase = bytes(passphrase, 'UTF-8')
             key = urlsafe_b64encode(kdf.derive(bpassphrase))
@@ -40,15 +41,20 @@ class Secret:
             'passphrase': self.passphrase,
             'ttl': self.ttl
         })}
-        r.mset(secret)
-        r.expire(self.secret_id, dt.timedelta(hours=self.ttl))
+        current_app.redis.mset(secret)
+        current_app.redis.expire(self.secret_id, dt.timedelta(hours=self.ttl))
         return self.secret_id
 
     def destroy(self):
-        r.delete(self.secret_id)
+        try:
+            current_app.redis.delete(self.secret_id)
+        except Exception as e:
+            return False
+        return True
 
-    def load(secret_id: str):
-        secret = r.get(secret_id)
+    @classmethod
+    def load(cls, secret_id: str):
+        secret = current_app.redis.get(secret_id)
         if secret:
             secret = json.loads(secret)
             return Secret(secret['secret'], ttl=int(secret['ttl']), created_at=secret['created_at'], encrypted=True,
@@ -58,7 +64,9 @@ class Secret:
 
     def read(self, passphrase: str = ''):
         if dt.datetime.utcnow() < self.end_of_life:
-            kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=bytes(current_app.config['SECRET_KEY'], 'UTF-8'), iterations=100000,
+            kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32,
+                             salt=bytes(current_app.config['SECRET_KEY'], 'UTF-8'),
+                             iterations=100000,
                              backend=default_backend())
             bpassphrase = bytes(passphrase, 'UTF-8')
             key = urlsafe_b64encode(kdf.derive(bpassphrase))
@@ -66,7 +74,7 @@ class Secret:
             try:
                 decrypted = f.decrypt(eval(self.secret)).decode()
             except InvalidToken:
-                return 404
+                return False
             Secret.destroy(self)
             return decrypted
         else:
@@ -80,3 +88,27 @@ class Secret:
             'ttl': self.ttl,
             'passphrase': self.passphrase
         }})
+
+
+class Admin:
+
+    def __init__(self, secret: Secret):
+        self.secret_id = secret.secret_id
+        self.admin_id = md5(self.secret_id.encode()).hexdigest()
+        self.ttl = secret.ttl
+
+    def save(self):
+        admin = {self.admin_id: json.dumps({
+            'secret_id': str(self.secret_id)
+        })}
+        current_app.redis.mset(admin)
+        current_app.redis.expire(self.admin_id, dt.timedelta(hours=self.ttl))
+        return self.admin_id
+
+    @classmethod
+    def load_secret(cls, admin_id: str):
+        admin = current_app.redis.get(admin_id)
+        if admin:
+            admin = json.loads(admin)
+            return Secret.load(admin['secret_id'])
+        return False

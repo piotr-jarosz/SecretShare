@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block scontent %}
-    <h1>500 Unexpected error</h1>
-    <p>An unexpected error has occurred</p>
-    <p>The administrator has been notified. Sorry for the inconvenience!</p>
-    <p><a href="{{ url_for('secret.index') }}">Let's create new secret!</a></p>
+    <h1>{{ _('500 Unexpected error') }}</h1>
+    <p>{{ _('An unexpected error has occurred') }}</p>
+    <p>{{ _('The administrator has been notified. Sorry for the inconvenience!') }}</p>
+    <p><a href="{{ url_for('secret.index') }}">{{ _('Let\'s create new secret!') }}</a></p>
 {% endblock %}

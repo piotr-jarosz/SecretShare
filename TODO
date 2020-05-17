@@ -1,16 +1,18 @@
+in progress:
+TODO: send secret-passphrase via SMS
+
 important:
-TODO: Add some testing
 TODO: FE fixes for mobile view
 TODO: refactor from Active Record to registry pattern
-TODO: fix exception on admin when secret doesn't exist
-
+TODO: Notify creator about opened secret
 
 miscellaneous:
-TODO: password generator - add checkbox for upper case, lower case, digits, etc.
-TODO: add locales
 TODO: add way to collect statistics
 TODO: add statistics panel
+TODO: password generator - add checkbox for upper case, lower case, digits, etc.
 
-communication:
-TODO: send secret link via email
-TODO: send secret-passphrase via SMS
+
+
+
+notes:
+consider migration of recaptcha to any version: https://github.com/piotr-jarosz/flask-recaptcha/blob/master/recaptcha2.py

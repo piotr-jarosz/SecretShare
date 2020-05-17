@@ -3,6 +3,10 @@
 {% import "bootstrap/fixes.html" as fixes %}
 {% import "bootstrap/utils.html" as utils %}
 
+{% block title %}
+    {% if title %}SecretShare: {{ title }}{% else %}{{ _('SecretShare! Create your secret now!') }}{% endif %}
+{% endblock %}
+
 {% block head %}
     {{super()}}
     {{fixes.ie8()}}
@@ -26,6 +30,10 @@
         width: 100%;
         height: 60px; /* Set the fixed height of the footer here */
         line-height: 60px; /* Vertically center the text there */
+    }
+
+    .form-inline > * {
+    margin:10px 10px 10px 20px;
     }
 </style>
 {% endblock %}
@@ -77,4 +85,6 @@
 {% block scripts %}
     {{ super() }}
     {{ moment.include_moment() }}
+    {{ moment.lang(g.locale) }}
+    <script src="https://www.google.com/recaptcha/api.js"></script>
 {% endblock %}
