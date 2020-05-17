@@ -4,7 +4,7 @@ from redis import ConnectionError
 from flask_babel import _, get_locale
 from requests import post
 
-from app.models import Secret
+from app.models import Secret, Admin
 from app.secret import bp
 from app.secret.forms import SecretForm, ReadSecretForm, SendSecretLink, SendPassphrase, BurnSecretForm
 from app.email import send_secret_link_email
@@ -32,12 +32,14 @@ def index():
         secret = Secret(form.secret.data, form.ttl.data, passphrase=form.passphrase.data)
         try:
             secret_id = secret.save()
+            admin = Admin(secret)
+            admin_id = admin.save()
         except ConnectionError as e:
             current_app.logger.error(e)
             return 500
         if secret_id:
             flash('Secret created!')
-        return redirect(url_for('secret.secret_admin', secret_id=secret_id))
+        return redirect(url_for('secret.secret_admin', admin_id=admin_id))
     return render_template('secrets/index.html', title=_('Create your secret now!'), form=form)
 
 
@@ -64,26 +66,27 @@ def read_secret(secret_id: str):
     return render_template('secrets/secret.html', passphrase=passphrase, secret_id=secret_id, form=form)
 
 
-@bp.route("/<secret_id>/admin/", methods=['GET', 'POST'])
-def secret_admin(secret_id):
-    secret = Secret.load(secret_id)
-    sms_form = SendPassphrase()
-    email_form = SendSecretLink()
-    burn_form = BurnSecretForm()
-    if sms_form.submit_sms.data and sms_form.validate():
-        flash('SMS sent!')
-    if email_form.submit_email.data and email_form.validate():
-        flash('Email sent!')
-        send_secret_link_email(recivers=[email_form.email.data], secret=secret)
-    if burn_form.submit.data and burn_form.validate():
-        if secret.destroy():
-            flash('Secret destroyed!')
-        else:
-            flash('Secret not found!')
-        return redirect(url_for('secret.secret_admin', secret_id=secret_id))
+@bp.route("/admin/<admin_id>/", methods=['GET', 'POST'])
+def secret_admin(admin_id):
+    secret = Admin.load_secret(admin_id)
+    if secret:
+        sms_form = SendPassphrase()
+        email_form = SendSecretLink()
+        burn_form = BurnSecretForm()
+        if sms_form.submit_sms.data and sms_form.validate():
+            flash('SMS sent!')
+        if email_form.submit_email.data and email_form.validate():
+            flash('Email sent!')
+            send_secret_link_email(recivers=[email_form.email.data], secret=secret)
+        if burn_form.submit.data and burn_form.validate():
+            if secret.destroy():
+                flash('Secret destroyed!')
+    else:
+        abort(404)
     return render_template('secrets/secret_admin.html',
                            secret=secret,
-                           secret_id=secret_id,
+                           secret_id=secret.secret_id,
+                           admin_id=admin_id,
                            email_form=email_form,
                            sms_form=sms_form,
                            burn_form=burn_form

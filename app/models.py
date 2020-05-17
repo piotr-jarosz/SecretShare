@@ -18,7 +18,8 @@ class Secret:
         self.ttl = int(ttl)
         self.passphrase = True if passphrase else False
         if not encrypted:
-            kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=bytes(current_app.config['SECRET_KEY'], 'UTF-8'), iterations=100000,
+            kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32,
+                             salt=bytes(current_app.config['SECRET_KEY'], 'UTF-8'), iterations=100000,
                              backend=default_backend())
             bpassphrase = bytes(passphrase, 'UTF-8')
             key = urlsafe_b64encode(kdf.derive(bpassphrase))
@@ -87,3 +88,27 @@ class Secret:
             'ttl': self.ttl,
             'passphrase': self.passphrase
         }})
+
+
+class Admin:
+
+    def __init__(self, secret: Secret):
+        self.secret_id = secret.secret_id
+        self.admin_id = md5(self.secret_id.encode()).hexdigest()
+        self.ttl = secret.ttl
+
+    def save(self):
+        admin = {self.admin_id: json.dumps({
+            'secret_id': str(self.secret_id)
+        })}
+        current_app.redis.mset(admin)
+        current_app.redis.expire(self.admin_id, dt.timedelta(hours=self.ttl))
+        return self.admin_id
+
+    @classmethod
+    def load_secret(cls, admin_id: str):
+        admin = current_app.redis.get(admin_id)
+        if admin:
+            admin = json.loads(admin)
+            return Secret.load(admin['secret_id'])
+        return False
