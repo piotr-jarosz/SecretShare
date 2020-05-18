@@ -1,9 +1,10 @@
 in progress:
 TODO: send secret-passphrase via SMS
+TODO: Notify creator about opened secret
+
 
 important:
 TODO: FE fixes for mobile view
-TODO: refactor from Active Record to registry pattern
 TODO: Notify creator about opened secret
 
 miscellaneous:
