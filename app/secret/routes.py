@@ -8,6 +8,7 @@ from app.models import Secret, Admin
 from app.secret import bp
 from app.secret.forms import SecretForm, ReadSecretForm, SendSecretLink, SendPassphrase, BurnSecretForm
 from app.email import send_secret_link_email
+from app.redis_registry import RedisRegistry
 
 
 def flash(message): flask_flash(message, category='info')
@@ -29,23 +30,22 @@ def before_request():
 def index():
     form = SecretForm()
     if form.validate_on_submit():
-        secret = Secret(form.secret.data, form.ttl.data, passphrase=form.passphrase.data)
+        secret = Secret(secret_value=form.secret.data, ttl=form.ttl.data, passphrase=form.passphrase.data)
         try:
-            secret_id = secret.save()
-            admin = Admin(secret)
-            admin_id = admin.save()
+            RedisRegistry(secret).save()
+            admin = Admin.create_admin(secret)
+            RedisRegistry(admin).save()
         except ConnectionError as e:
             current_app.logger.error(e)
             return 500
-        if secret_id:
-            flash('Secret created!')
-        return redirect(url_for('secret.secret_admin', admin_id=admin_id))
+        flash('Secret created!')
+        return redirect(url_for('secret.secret_admin', admin_id=admin.obj_id))
     return render_template('secrets/index.html', title=_('Create your secret now!'), form=form)
 
 
-@bp.route("/<secret_id>/", methods=['GET', 'POST', 'DELETE'])
+@bp.route("/<secret_id>/", methods=['GET', 'POST'])
 def read_secret(secret_id: str):
-    s = Secret.load(secret_id)
+    s = RedisRegistry.load(secret_id, Secret)
     if s:
         passphrase = True if s.passphrase else False
         current_app.logger.debug('Secret exists and passphrase state is: ' + str(passphrase))
@@ -59,7 +59,10 @@ def read_secret(secret_id: str):
             return json.dumps({'secret': False}), 404
         from html import escape
         secret = s.read(passphrase=form.passphrase.data)
+        current_app.logger.debug('Secret is: ' + str(secret))
+
         if secret:
+            RedisRegistry(s).destroy()
             return json.dumps({'secret': escape(secret)})
         else:
             return json.dumps({'secret': False}), 404
@@ -68,7 +71,8 @@ def read_secret(secret_id: str):
 
 @bp.route("/admin/<admin_id>/", methods=['GET', 'POST'])
 def secret_admin(admin_id):
-    secret = Admin.load_secret(admin_id)
+    admin = RedisRegistry.load(admin_id, Admin)
+    secret = RedisRegistry.load(admin.secret_id, Secret)
     if secret:
         sms_form = SendPassphrase()
         email_form = SendSecretLink()
@@ -79,15 +83,16 @@ def secret_admin(admin_id):
             flash('Email sent!')
             send_secret_link_email(recivers=[email_form.email.data], secret=secret)
         if burn_form.submit.data and burn_form.validate():
-            if secret.destroy():
+            if RedisRegistry(secret).destroy():
+                current_app.logger.debug(request.form)
                 flash('Secret destroyed!')
-    else:
-        abort(404)
-    return render_template('secrets/secret_admin.html',
-                           secret=secret,
-                           secret_id=secret.secret_id,
-                           admin_id=admin_id,
-                           email_form=email_form,
-                           sms_form=sms_form,
-                           burn_form=burn_form
-                           )
+            else: abort(500)
+        return render_template('secrets/secret_admin.html',
+                               secret=secret,
+                               secret_id=secret.obj_id,
+                               admin_id=admin_id,
+                               email_form=email_form,
+                               sms_form=sms_form,
+                               burn_form=burn_form
+                               )
+    abort(404)
