@@ -1,13 +1,18 @@
 import datetime as dt
-from hashlib import md5
+import uuid
 from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from random import randint
+from app import current_app
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
 from base64 import urlsafe_b64encode
 from config import Config as C
 import json
+from app import db, login
+from flask_login import UserMixin
+from time import time
 
 
 class Secret:
@@ -44,9 +49,7 @@ class Secret:
             self.created_at = dt.datetime.utcnow()
         self.end_of_life = self.created_at + dt.timedelta(hours=self.ttl)
         if not hasattr(self, 'obj_id'):
-            sid = str(self.created_at) + ''.join([str(randint(0, 10)) for _ in range(10)])
-            sid = sid.encode()
-            self.obj_id = md5(sid).hexdigest()
+            self.obj_id = str(uuid.uuid4())
 
     def __dict__(self):
         secret = {self.obj_id: {
@@ -101,6 +104,58 @@ class Admin:
     @classmethod
     def create_admin(cls, secret: Secret):
         secret_id = secret.obj_id
-        obj_id = md5(secret_id.encode()).hexdigest()
+        obj_id = str(uuid.uuid4())
         ttl = secret.ttl
         return Admin(secret_id=secret_id, obj_id=obj_id, ttl=ttl)
+
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), index=True, unique=True)
+    email = db.Column(db.String(120), index=True, unique=True)
+    password_hash = db.Column(db.String(128))
+    token = db.Column(db.String(32), index=True, unique=True)
+    token_expiration = db.Column(db.DateTime)
+
+    secrets = db.relationship('AdminManager', backref='owner', lazy='dynamic')
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def activate_account(self, activation: bool=True):
+        self.password_hash = activation
+
+    def __repr__(self):
+        return '<User {}>'.format(self.username)
+
+    @login.user_loader
+    def load_user(id):
+        return User.query.get(int(id))
+
+    def get_password_token(self, expires_in=600):
+        return jwt.encode(
+            {'set_password': self.id, 'exp': time() + expires_in},
+            current_app.config['SECRET_KEY'],
+            algorithm='HS256').decode('utf-8')
+
+    @staticmethod
+    def verify_set_password_token(token):
+        try:
+            id = jwt.decode(token, current_app.config['SECRET_KEY'],
+                            algorithms=['HS256'])['set_password']
+        except:
+            return
+        return User.query.get(id)
+
+
+class AdminManager(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    admin_id = db.Column(db.String(140), index=True)
+    timestamp = db.Column(db.DateTime, index=True, default=dt.datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def __repr__(self):
+        return '<AdminManager {}>'.format(self.body)

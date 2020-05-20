@@ -1,0 +1,8 @@
+Dear {{ user.username }},
+
+If you registered this account, please activate it and setup your password:
+{{ url_for('auth.set_password', token=token, _external=True) }}
+
+If you have not signed in to SecretShare, ignore this message and account will be removed in 72 hours.
+Sincerely,
+The SecretShare Team

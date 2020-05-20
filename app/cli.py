@@ -23,7 +23,7 @@ def register(app):
     @test.command('run')
     def run():
         try:
-            subprocess.call('python -m unittest .', shell=False)
+            subprocess.call('python -moment unittest .', shell=False)
         except Exception as e:
             app.logger.error(e)
             exit(1)

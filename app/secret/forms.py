@@ -13,10 +13,13 @@ class SecretForm(FlaskForm):
                                                   ('12', _l('12 hours')), ('24', _l('24 hours'))],
                       validators=[DataRequired()])
     submit = SubmitField('Create secret!')
-    recaptcha = RecaptchaField() if Config.RECAPTCHA_PUBLIC_KEY else None
+    if Config.RECAPTCHA_PUBLIC_KEY:
+        recaptcha = RecaptchaField()
+
 
 class BurnSecretForm(FlaskForm):
     submit = SubmitField(_l('Burn the Secret!'))
+
 
 class ReadSecretForm(FlaskForm):
     passphrase = PasswordField(_l('Passphrase'))

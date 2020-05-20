@@ -1,24 +1,21 @@
 import json
-from flask import render_template, flash as flask_flash, redirect, url_for, request, current_app, abort, g
+from flask import render_template,redirect, url_for, request, current_app, abort, g
+from app.helpers import flash
 from redis import ConnectionError
 from flask_babel import _, get_locale
-from requests import post
-
-from app.models import Secret, Admin
+from app import login, db
+from app.models import Secret, Admin, User
 from app.secret import bp
 from app.secret.forms import SecretForm, ReadSecretForm, SendSecretLink, SendPassphrase, BurnSecretForm
-from app.email import send_secret_link_email
+from app.secret.email import send_secret_link_email
 from app.redis_registry import RedisRegistry
 
 
-def flash(message): flask_flash(message, category='info')
-
-
-def is_human(captcha_response):
-    payload = {'response': captcha_response, 'secret': current_app.config['RECAPTCHA_PRIVATE_KEY']}
-    response = post("https://www.google.com/recaptcha/api/siteverify", data=payload)
-    response_text = json.loads(response.text)
-    return response_text
+# def is_human(captcha_response):
+#     payload = {'response': captcha_response, 'secret': current_app.config['RECAPTCHA_PRIVATE_KEY']}
+#     response = post("https://www.google.com/recaptcha/api/siteverify", data=payload)
+#     response_text = json.loads(response.text)
+#     return response_text
 
 
 @bp.before_request
@@ -43,7 +40,7 @@ def index():
     return render_template('secrets/index.html', title=_('Create your secret now!'), form=form)
 
 
-@bp.route("/<secret_id>/", methods=['GET', 'POST'])
+@bp.route("/secret/<secret_id>/", methods=['GET', 'POST'])
 def read_secret(secret_id: str):
     s = RedisRegistry.load(secret_id, Secret)
     if s:
@@ -86,7 +83,7 @@ def secret_admin(admin_id):
             if RedisRegistry(secret).destroy():
                 current_app.logger.debug(request.form)
                 flash('Secret destroyed!')
-            else: abort(500)
+                return redirect(url_for('secret.index'))
         return render_template('secrets/secret_admin.html',
                                secret=secret,
                                secret_id=secret.obj_id,
