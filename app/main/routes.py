@@ -2,12 +2,9 @@ from flask import redirect, url_for, render_template
 from app.main import bp
 from flask_babel import _
 
-@bp.route("/")
-def index():
-    return redirect(url_for('secret.index'))
 
 @bp.route("/help/")
-def help():
+def help_section():
     return render_template('static/about.html')
 
 @bp.route("/password-generator/")

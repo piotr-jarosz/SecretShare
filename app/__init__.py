@@ -7,12 +7,21 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 from flask_moment import Moment
-from flask_babel import Babel
+from flask_babel import Babel, lazy_gettext as _l
 from flask_mail import Mail
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_login import LoginManager
 
+
+db = SQLAlchemy()
+migrate = Migrate()
+login = LoginManager()
+login.login_view = 'auth.login'
+login.login_message = _l('Please log in to access this page.')
 c = Config()
-b = Bootstrap()
-m = Moment()
+bootstrap = Bootstrap()
+moment = Moment()
 babel = Babel()
 mail = Mail()
 
@@ -21,7 +30,11 @@ mail = Mail()
 def create_app(config_class=c):
     app = Flask(__name__, static_url_path='/static')
     app.config.from_object(config_class)
-    b.init_app(app)
+
+    db.init_app(app)
+    login.init_app(app)
+    migrate.init_app(app, db)
+    bootstrap.init_app(app)
     mail.init_app(app)
     if app.testing:
         app.redis = FakeStrictRedis()
@@ -32,31 +45,45 @@ def create_app(config_class=c):
                           password=c.REDIS_PASSWORD,
                           health_check_interval=c.REDIS_HEALTHCHECK,
                           db=c.REDIS_DB_ID)
-    m.init_app(app)
+    moment.init_app(app)
     babel.init_app(app)
 
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
 
+    from app.auth import bp as auth_bp
+    app.register_blueprint(auth_bp)
+
     from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp)
 
     from app.secret import bp as secret_bp
-    app.register_blueprint(secret_bp, url_prefix='/secret')
+    app.register_blueprint(secret_bp)
 
-    if not app.debug:
-        lp = app.config['LOGS_PATH']
-        if not os.path.exists(lp):
-            os.mkdir(lp)
-        file_handler = RotatingFileHandler(lp + '/app.log', maxBytes=10240,
+    if not app.debug and not app.testing:
+        log_path = app.config['LOG_PATH']
+        if not os.path.exists(log_path):
+            os.mkdir(log_path)
+        file_handler = RotatingFileHandler(log_path + '/app.log', maxBytes=10240,
                                            backupCount=10)
         file_handler.setFormatter(logging.Formatter(
             '%(asctime)s [%(levelname)s]: %(message)s [in %(pathname)s:%(lineno)d]'))
-        file_handler.setLevel(logging.INFO)
+        if app.config['LOG_LEVEL'] == 'DEBUG':
+            file_handler.setLevel(logging.DEBUG)
+        if app.config['LOG_LEVEL'] == 'INFO':
+            file_handler.setLevel(logging.INFO)
+        if app.config['LOG_LEVEL'] == 'WARN':
+            file_handler.setLevel(logging.WARN)
+        if app.config['LOG_LEVEL'] == 'ERROR':
+            file_handler.setLevel(logging.ERROR)
         app.logger.addHandler(file_handler)
-
-        app.logger.setLevel(logging.INFO)
         app.logger.info('Application start')
+
+    app.logger.setLevel(logging.INFO)
+
+    @app.context_processor
+    def is_login():
+        return dict(login_disabled=app.config['LOGIN_DISABLED'])
 
     return app
 
