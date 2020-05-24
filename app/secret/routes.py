@@ -69,7 +69,7 @@ def read_secret(secret_id: str):
 @bp.route("/admin/<admin_id>/", methods=['GET', 'POST'])
 def secret_admin(admin_id):
     admin = RedisRegistry.load(admin_id, Admin)
-    secret = RedisRegistry.load(admin.secret_id, Secret)
+    secret = RedisRegistry.load(admin.secret_id, Secret) if admin else False
     if secret:
         sms_form = SendPassphrase()
         email_form = SendSecretLink()
