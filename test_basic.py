@@ -152,6 +152,12 @@ class BasicTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(keys_count, len(self.app.redis.keys()))
 
+
+    @_logger
+    def test_admin_page__secret_doesnt_exist(self):
+        response = self.app_client.get(url_for('secret.secret_admin', admin_id='non'), follow_redirects=True)
+        self.assertEqual(response.status_code, 404)
+
 class UserModelCase(unittest.TestCase):
     def setUp(self):
         self.app = create_app(TestConfig)
