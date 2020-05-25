@@ -57,6 +57,17 @@
 {#                </ul>#}
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="{{ url_for('main.password_generator') }}">Password generator</a></li>
+                {%  if not login_disabled %}
+                    {% if current_user.is_anonymous %}
+                    <li><a href="{{ url_for('auth.login') }}">{{ _('Login') }}</a></li>
+                    {% else %}
+                    <li>
+                        <a href="{{ url_for('secret.index') }}">{{ _('Dashboard') }}</a>
+                    </li>
+{#                    <li><a href="{{ url_for('main.user', username=current_user.username) }}">{{ _('Profile') }}</a></li>#}
+                    <li><a href="{{ url_for('auth.logout') }}">{{ _('Logout') }}</a></li>
+                    {% endif %}
+                {% endif %}
                 </ul>
             </div>
         </div>
@@ -71,12 +82,12 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
-        {% block scontent %}{% endblock %}
+        {% block app_content %}{% endblock %}
     </div>
     {{super()}}
 <!-- Footer -->
     <footer class="footer">
-     <div class="navbar-fixed-bottom navbar navbar-inverse footer-copyright text-center py-3"><span class="text-muted">© 2020 Copyright:
+     <div class="navbar-inverse footer-copyright text-center py-3"><span class="text-muted">© 2020 Copyright:
          <a href="https://github.com/piotr-jarosz">Piotr Jarosz</a> under MIT license. Source code is available at:<a href="https://github.com/Icoqu/SecretShare">https://github.com/Icoqu/SecretShare</a></span>
      </div>
     </footer>

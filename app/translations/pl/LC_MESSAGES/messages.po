@@ -21,7 +21,7 @@ msgstr ""
 
 #: app/errors/handlers.py:10
 msgid ""
-"<p><b>404 Not Found</b></p> <p>The requested URL: <a "
+"<p><bootstrap>404 Not Found</bootstrap></p> <p>The requested URL: <a "
 "href=\"{path}\">{path}</i></a> was not found on the server. If you "
 "entered the URL manually please check your spelling and try again.</p>"
 msgstr ""

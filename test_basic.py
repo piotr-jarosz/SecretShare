@@ -1,12 +1,9 @@
 from json import loads
-import os
 import unittest
-from datetime import datetime, timedelta
 from flask import url_for
-from app import create_app
+from app import create_app, db
 from config import Config
-from app.models import Secret, Admin
-import traceback
+from app.models import Secret, Admin, User
 from app.redis_registry import RedisRegistry
 
 
@@ -23,7 +20,6 @@ class BasicTests(unittest.TestCase):
         def decorator(self):
             func(self)
             self.app.logger.info(func.__name__ + ' DONE')
-
         return decorator
 
     ############################
@@ -64,7 +60,7 @@ class BasicTests(unittest.TestCase):
             'passphrase': 'empty'
         }
         keys_count = len(self.app.redis.keys())
-        response = self.app_client.post('/secret', follow_redirects=True, data=data)
+        response = self.app_client.post(url_for('secret.index'), follow_redirects=True, data=data)
         self.assertEqual(keys_count + 2, len(self.app.redis.keys()))
         self.assertEqual(response.status_code, 200)
 
@@ -75,7 +71,7 @@ class BasicTests(unittest.TestCase):
             'ttl': '1'
         }
         keys_count = len(self.app.redis.keys())
-        response = self.app_client.post('/secret', follow_redirects=True, data=data)
+        response = self.app_client.post(url_for('secret.index'), follow_redirects=True, data=data)
         self.assertEqual(keys_count + 2, len(self.app.redis.keys()))
         self.assertEqual(response.status_code, 200)
 
@@ -155,6 +151,30 @@ class BasicTests(unittest.TestCase):
         response = self.app_client.get(url_for('secret.secret_admin', admin_id=admin_id), follow_redirects=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(keys_count, len(self.app.redis.keys()))
+
+
+    @_logger
+    def test_admin_page__secret_doesnt_exist(self):
+        response = self.app_client.get(url_for('secret.secret_admin', admin_id='non'), follow_redirects=True)
+        self.assertEqual(response.status_code, 404)
+
+class UserModelCase(unittest.TestCase):
+    def setUp(self):
+        self.app = create_app(TestConfig)
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+        db.create_all()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        self.app_context.pop()
+
+    def test_password_hashing(self):
+        u = User(username='susan')
+        u.set_password('cat')
+        self.assertFalse(u.check_password('dog'))
+        self.assertTrue(u.check_password('cat'))
 
 
 if __name__ == "__main__":

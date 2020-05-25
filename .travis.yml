@@ -3,4 +3,7 @@ python:
   - "3.7"
 install:
   - pip install -r requirements.txt
-script: python -m unittest
+  - pip install codecov
+script: coverage run test_basic.py
+after_success:
+  - codecov
