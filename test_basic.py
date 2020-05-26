@@ -10,6 +10,7 @@ from app.redis_registry import RedisRegistry
 class TestConfig(Config):
     TESTING = True
     WTF_CSRF_ENABLED = False
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///'
     DEBUG = False
 
 
@@ -31,10 +32,13 @@ class BasicTests(unittest.TestCase):
         self.app = create_app(TestConfig)
         self.app_context = self.app.test_request_context()
         self.app_context.push()
+        db.create_all()
         self.app_client = self.app.test_client()
 
     # executed after each test
     def tearDown(self):
+        db.session.remove()
+        db.drop_all()
         self.app_context.pop()
 
     ######################################

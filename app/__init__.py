@@ -60,6 +60,9 @@ def create_app(config_class=c):
     from app.secret import bp as secret_bp
     app.register_blueprint(secret_bp)
 
+    from app.manager import bp as manager_bp
+    app.register_blueprint(manager_bp, url_prefix='/manager')
+
     if not app.debug and not app.testing:
         log_path = app.config['LOG_PATH']
         if not os.path.exists(log_path):
@@ -78,6 +81,7 @@ def create_app(config_class=c):
             file_handler.setLevel(logging.ERROR)
         app.logger.addHandler(file_handler)
         app.logger.info('Application start')
+        app.logger.info('db: ' + str(db))
 
     app.logger.setLevel(logging.INFO)
 

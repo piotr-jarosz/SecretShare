@@ -1,12 +1,11 @@
 in progress:
-TODO: Registration:
+TODO: Authorization:
+    TODO: Secrets dashboard
     TODO: send secret-passphrase via SMS
     TODO: Notify creator about opened secret
 
 
 important:
-TODO: FE fixes for mobile view
-TODO: Notify creator about opened secret
 
 miscellaneous:
 TODO: add way to collect statistics

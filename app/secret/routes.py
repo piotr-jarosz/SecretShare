@@ -3,19 +3,13 @@ from flask import render_template,redirect, url_for, request, current_app, abort
 from app.helpers import flash
 from redis import ConnectionError
 from flask_babel import _, get_locale
-from app import login, db
-from app.models import Secret, Admin, User
+from app import  db
+from app.models import Secret, Admin, User, AdminManager
 from app.secret import bp
 from app.secret.forms import SecretForm, ReadSecretForm, SendSecretLink, SendPassphrase, BurnSecretForm
 from app.secret.email import send_secret_link_email
 from app.redis_registry import RedisRegistry
-
-
-# def is_human(captcha_response):
-#     payload = {'response': captcha_response, 'secret': current_app.config['RECAPTCHA_PRIVATE_KEY']}
-#     response = post("https://www.google.com/recaptcha/api/siteverify", data=payload)
-#     response_text = json.loads(response.text)
-#     return response_text
+from flask_login import current_user
 
 
 @bp.before_request
@@ -31,6 +25,11 @@ def index():
         try:
             RedisRegistry(secret).save()
             admin = Admin.create_admin(secret)
+            managed_admin = AdminManager()
+            managed_admin.admin_id = admin.obj_id
+            managed_admin.user_id = current_user.id if current_user.is_authenticated else None
+            db.session.add(managed_admin)
+            db.session.commit()
             RedisRegistry(admin).save()
         except ConnectionError as e:
             current_app.logger.error(e)
@@ -66,19 +65,23 @@ def read_secret(secret_id: str):
     return render_template('secrets/secret.html', passphrase=passphrase, secret_id=secret_id, form=form)
 
 
-@bp.route("/admin/<admin_id>/", methods=['GET', 'POST'])
+@bp.route("/secret-manager/<admin_id>/", methods=['GET', 'POST'])
 def secret_admin(admin_id):
     admin = RedisRegistry.load(admin_id, Admin)
     secret = RedisRegistry.load(admin.secret_id, Secret) if admin else False
     if secret:
-        sms_form = SendPassphrase()
-        email_form = SendSecretLink()
+        if current_user.is_authenticated:
+            sms_form = SendPassphrase()
+            email_form = SendSecretLink()
+            if sms_form.submit_sms.data and sms_form.validate():
+                flash('SMS sent!')
+            if email_form.submit_email.data and email_form.validate():
+                flash('Email sent!')
+                send_secret_link_email(recivers=[email_form.email.data], secret=secret)
+        else:
+            sms_form = False
+            email_form = False
         burn_form = BurnSecretForm()
-        if sms_form.submit_sms.data and sms_form.validate():
-            flash('SMS sent!')
-        if email_form.submit_email.data and email_form.validate():
-            flash('Email sent!')
-            send_secret_link_email(recivers=[email_form.email.data], secret=secret)
         if burn_form.submit.data and burn_form.validate():
             if RedisRegistry(secret).destroy():
                 current_app.logger.debug(request.form)
